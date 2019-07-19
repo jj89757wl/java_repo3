@@ -1,0 +1,119 @@
+<!-- 头部 start -->
+<script src="js/getParameter.js"></script>
+<script src="js/jquery-3.3.1.js"></script>
+<header id="header">
+    <div class="top_banner">
+        <img src="images/top_banner.jpg" alt="">
+    </div>
+    <div class="shortcut">
+        <!-- 未登录状态  -->
+        <div class="login_out">
+            <a href="login.html">登录</a>
+            <a href="register.html">注册</a>
+        </div>
+        <!-- 登录状态  -->
+        <div class="login">
+            <span>欢迎回来，admin</span>
+            <a href="myfavorite.html" class="collection">我的收藏</a>
+            <a href="user?method=logout">退出</a>
+        </div>
+    </div>
+    <div class="header_wrap">
+        <div class="topbar">
+            <div class="logo">
+                <a href="/"><img src="images/logo.jpg" alt=""></a>
+            </div>
+            <div class="search">
+                <input name="" id="inputId" type="text" placeholder="请输入路线名称" class="search_input" autocomplete="off">
+                <a href="javascript:doSearch();" class="search-button">搜索</a>
+            </div>
+            <div class="hottel">
+                <div class="hot_pic">
+                    <img src="images/hot_tel.jpg" alt="">
+                </div>
+                <div class="hot_tel">
+                    <p class="hot_time">客服热线(9:00-6:00)</p>
+                    <p class="hot_num">400-618-9090</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- 头部 end -->
+<!-- 首页导航 -->
+<div class="navitem">
+    <ul class="nav">
+        <li class="nav-active"><a href="index.html">首页</a></li>
+        <li><a href="route_list.html">门票</a></li>
+        <li><a href="route_list.html">酒店</a></li>
+        <li><a href="route_list.html">香港车票</a></li>
+        <li><a href="route_list.html">出境游</a></li>
+        <li><a href="route_list.html">国内游</a></li>
+        <li><a href="route_list.html">港澳游</a></li>
+        <li><a href="route_list.html">抱团定制</a></li>
+        <li><a href="route_list.html">全球自由行</a></li>
+        <li><a href="favoriterank.html">收藏排行榜</a></li>
+    </ul>
+</div>
+
+<script>
+
+    //搜索
+    function doSearch() {
+        //1.获得用户输入的线路名称, cid,curPage=1
+        var rname =  $("#inputId").val();
+        var cid =  getParameter('cid');
+        //2.跳转到route_list.html
+        location.href="route_list.html?rname="+rname+"&cid="+cid+"&curPage=1";
+
+    }
+
+    //查询类别
+    $.post('category',{method:'findAll'},function(result){
+        //解析result 填充页面
+        if (result.flag){
+            //获得字符串数据
+            var jsonStr =  result.data;
+            //把字符串数据转换成json对象
+            var categoryData =  JSON.parse(jsonStr);
+            //解析, 填充到ul
+            var liHtml = "<li class=\"nav-active\"><a href=\"index.html\">首页</a></li>";
+            $(categoryData).each(function (i,obj) {
+                liHtml+="<li><a href=\"route_list.html?cid="+obj.cid+"&curPage=1\">"+obj.cname+"</a></li>";
+            });
+            liHtml+="<li><a href=\"favoriterank.html?curPage=1\">收藏排行榜</a></li>";
+
+            $(".nav").html(liHtml);
+
+        }else{
+            alert(result.msg);
+        }
+
+    },'json')
+
+    //先把登录状态隐藏
+    $(".login").hide();
+    //发送Ajax请求 获得用户登录信息
+    $.post('user',{method:'getLoginInfo'},function (result) {
+        //解析result 展示页面
+        if (result.flag){
+            //登录状态
+            //登录状态显示
+            $(".login").show();
+            //未登录状态隐藏
+            $(".login_out").hide();
+            //填充页面
+            $(".login").html("<span>欢迎回来，"+result.data.name+"</span>\n" +
+                "            <a href=\"myfavorite.html?curPage=1\" class=\"collection\">我的收藏</a>\n" +
+                "            <a href=\"user?method=logout\">退出</a>");
+
+        }else{
+            //未登录状态
+            //登录状态隐藏
+            $(".login").hide();
+            //未登录状态显示
+            $(".login_out").show();
+        }
+    },'json');
+
+</script>
